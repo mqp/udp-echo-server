@@ -36,5 +36,6 @@ if __name__ == "__main__":
     parser.add_argument('--port', help='The port that the client should connect to.', type=int, default=123)
     parser.add_argument('--verbose', '-v', help="Increases the logging verbosity level.", action='count')
     args = parser.parse_args()
-    logging.basicConfig(level=logging.DEBUG if args.verbose else logging.INFO)
+    logging.basicConfig(level=logging.DEBUG if args.verbose else logging.INFO,
+                        format='%(asctime)s %(levelname)s %(message)s')
     start(args)
