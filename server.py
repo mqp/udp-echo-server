@@ -3,8 +3,9 @@
 A simple UDP echo server.
 """
 import argparse
-import socket
+import itertools
 import logging
+import socket
 
 from helpers import receive_next
 
@@ -13,9 +14,10 @@ logger = logging.getLogger(__name__)
 def receive_and_send_one(sock):
     "Waits for a single datagram over the socket and echoes it back."
     input_data, addr = receive_next(sock)
-    logger.info("Received %s bytes from %s.", len(input_data), addr)
+    message = input_data.decode()
+    logger.info("Received message from %s: %s (%s bytes).", addr, message, len(input_data))
     output_len = sock.sendto(input_data, addr)
-    logger.info("Echoed %s bytes back to %s.", output_len, addr)
+    logger.info("Echoed message back to %s: %s (%s bytes).", addr, message, output_len)
 
 def start(args):
     "Runs the server."
@@ -24,7 +26,7 @@ def start(args):
     sock.bind((args.host, args.port))
     logger.info("Listening on %s:%s.", args.host, args.port)
     try:
-        while True:
+        for i in itertools.count(1):
             receive_and_send_one(sock)
     finally:
         logger.info("Shutting down.")

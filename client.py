@@ -3,29 +3,31 @@
 A simple client for talking to a UDP echo server and logging the transactions.
 """
 import argparse
-import socket
+import itertools
 import logging
+import socket
 import time
 
 from helpers import receive_next
 
 logger = logging.getLogger(__name__)
-message = "Stuck in an AWS datacenter server closet, please send help.".encode()
 
-def send_and_receive_one(sock, addr):
+def send_and_receive_one(sock, message, addr):
     "Sends a single datagram over the socket and waits for the response."
-    output_len = sock.sendto(message, addr)
-    logger.info("Sent %s bytes to %s.", output_len, addr)
+    output_len = sock.sendto(message.encode(), addr)
+    logger.info("Sent message to %s: %s (%s bytes).", addr, message, output_len)
     input_data, addr = receive_next(sock)
-    logger.info("Received %s bytes back from %s.", len(input_data), addr)
+    logger.info("Received message back from %s: %s (%s bytes).", addr, input_data.decode(), len(input_data))
 
 def start(args):
     "Starts sending messages to the server."
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     sock.settimeout(1) # seconds
+    addr = (args.host, args.port)
     try:
-        while True:
-            send_and_receive_one(sock, (args.host, args.port))
+        for i in itertools.count(1):
+            message = "This is message #{}.".format(i)
+            send_and_receive_one(sock, message, addr)
             time.sleep(1) # seconds
     finally:
         logger.info("Shutting down.")
