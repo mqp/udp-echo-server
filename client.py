@@ -20,6 +20,7 @@ def send_and_receive_one(sock, addr):
     logger.info("Received %s bytes back from %s.", len(input_data), addr)
 
 def start(args):
+    "Starts sending messages to the server."
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     sock.settimeout(1) # seconds
     try:
