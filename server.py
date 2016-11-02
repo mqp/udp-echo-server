@@ -7,9 +7,20 @@ import itertools
 import logging
 import socket
 
-from helpers import receive_next
-
 logger = logging.getLogger(__name__)
+
+# the buffer for receiving incoming messages
+BUFFER_SIZE = 4096
+
+def receive_next(sock):
+    "Repeatedly tries receiving on the given socket until some data comes in."
+    logger.debug("Waiting to receive data...")
+    while True:
+        try:
+            return sock.recvfrom(BUFFER_SIZE)
+        except socket.timeout:
+            logger.debug("No data received yet: retrying.")
+            pass
 
 def receive_and_send_one(sock):
     "Waits for a single datagram over the socket and echoes it back."
@@ -22,7 +33,7 @@ def receive_and_send_one(sock):
 def start(args):
     "Runs the server."
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    sock.settimeout(1) # seconds
+    sock.settimeout(5) # seconds
     sock.bind((args.host, args.port))
     logger.info("Listening on %s:%s.", args.host, args.port)
     try:
